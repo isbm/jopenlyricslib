@@ -1,4 +1,4 @@
-jopenlyricslib
-==============
+OpenLyrics Library for Java
+===========================
 
-OpenLyrics parser and writer for Java.
+Generic library with OpenLyrics parser and writer for Java.
