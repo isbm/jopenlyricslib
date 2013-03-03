@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -51,6 +53,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Store OpenLyrics object into XML DOM.
@@ -149,7 +152,31 @@ public class OpenLyricsWriter {
      */
     private Element getProperties() {
         Element properties = this.doc.createElement("properties");
+
+        properties.appendChild(this.getTitles());
+
         return properties;
+    }
+
+
+    /**
+     * Get titles of the song.
+     * 
+     * @return
+     */
+    private Element getTitles() {
+        Element titlesElement = this.doc.createElement("titles");
+        
+        // Gather titles
+        List<Locale> titleLocales = this.ol.getProperties().getTitleProperty().getTitleLocales();
+        for (int i = 0; i < titleLocales.size(); i++) {
+            Element titleElement = this.doc.createElement("title");
+            titleElement.setAttribute("lang", titleLocales.get(i).getLanguage());
+            titleElement.appendChild(this.doc.createTextNode(this.ol.getProperties().getTitleProperty().getTitle(titleLocales.get(i))));
+            titlesElement.appendChild(titleElement);
+        }
+
+        return titlesElement;
     }
 
 
@@ -171,6 +198,10 @@ public class OpenLyricsWriter {
                 verseElement.setAttribute("name", verse.getName());
             }
 
+            // Lines (I have no idea why they do exists at all if we already have verse!)
+            Element linesElement = this.doc.createElement("lines");
+            verseElement.appendChild(linesElement);
+
             // Add lines to the verse
             for (int j = 0; j < verse.getLines().size(); j++) {
                 VerseLine line = verse.getLines().get(j);
@@ -179,20 +210,20 @@ public class OpenLyricsWriter {
                 int substroffset = 0;
                 for (int cidx = 0; cidx < line.getChords().size(); cidx++) {
                     Chord chord = line.getChords().get(cidx);
-                    verseElement.appendChild(this.doc.createTextNode(line.getText().substring(substroffset, chord.getLineOffset())));
+                    linesElement.appendChild(this.doc.createTextNode(line.getText().substring(substroffset, chord.getLineOffset())));
                     substroffset = chord.getLineOffset();
 
                     // Add chord to DOM
                     Element chordElement = this.doc.createElement("chord");
                     chordElement.setAttribute("name", chord.getRoot()); // XXX: Needs a proper chord render
-                    verseElement.appendChild(chordElement);
+                    linesElement.appendChild(chordElement);
                 }
                 // Add the rest of the text left after chords.
-                verseElement.appendChild(this.doc.createTextNode(line.getText().substring(substroffset)));
+                linesElement.appendChild(this.doc.createTextNode(line.getText().substring(substroffset)));
 
                 // Do not <br/> to the last line in the verse
                 if ((j + 1) < verse.getLines().size()) {
-                    verseElement.appendChild(this.doc.createElement("br"));
+                    linesElement.appendChild(this.doc.createElement("br"));
                 }
             }
 
@@ -203,10 +234,3 @@ public class OpenLyricsWriter {
         return lyrics;
     }
 }
-
-
-
-
-
-
-

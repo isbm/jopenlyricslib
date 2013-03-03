@@ -32,7 +32,11 @@
 
 package de.suse.lib.openlyrics.properties;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -79,5 +83,25 @@ public class TitleProperty {
      */
     public String getTitle(Locale locale) {
         return this.title.get(locale) != null ? this.title.get(locale) : this.getDetaultTitle();
+    }
+
+
+    /**
+     * Get available title locales.
+     *
+     * @return
+     */
+    public List<Locale> getTitleLocales() {
+        List<Locale> locales = new ArrayList<Locale>();
+        Iterator<Locale> titleIterator = this.title.keySet().iterator();
+        while (titleIterator.hasNext()) {
+            locales.add(titleIterator.next());
+        }
+
+        if (!locales.contains(Locale.getDefault())) {
+            locales.add(Locale.getDefault());
+        }
+
+        return Collections.unmodifiableList(locales);
     }
 }

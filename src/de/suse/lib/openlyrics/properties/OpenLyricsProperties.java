@@ -208,7 +208,7 @@ public class OpenLyricsProperties {
      *
      * @return
      */
-    public TitleProperty getTitle() {
+    public TitleProperty getTitleProperty() {
         return title;
     }
 

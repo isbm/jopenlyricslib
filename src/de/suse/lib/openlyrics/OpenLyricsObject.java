@@ -208,7 +208,7 @@ public class OpenLyricsObject {
      */
     private void getAuthorsProp(Element properties) {
         NodeList authors = properties.getElementsByTagName("authors");
-        if (authors != null) {
+        if (authors != null && ((Element) authors.item(0)) != null) {
             NodeList authorsList = ((Element) authors.item(0)).getElementsByTagName("author");
             if (authorsList != null) {
                 for (int i = 0; i < authorsList.getLength(); i++) {
@@ -216,6 +216,8 @@ public class OpenLyricsObject {
                             .getChildNodes().item(0).getTextContent());
                 }
             }
+        } else {
+            this.properties.addAuthor("Unknown Author");
         }
     }
 
@@ -225,7 +227,7 @@ public class OpenLyricsObject {
      */
     private void getTitlesProp(Element properties) {
         NodeList titles = properties.getElementsByTagName("titles");
-        if (titles != null) {
+        if (titles != null && ((Element) titles.item(0)) != null) {
             NodeList titleList = ((Element) titles.item(0)).getElementsByTagName("title");
             if (titleList != null) {
                 for (int i = 0; i < titleList.getLength(); i++) {
@@ -243,6 +245,8 @@ public class OpenLyricsObject {
                     this.properties.addTitle(locale, titleNode.getChildNodes().item(0).getTextContent());
                 }
             }
+        } else {
+            this.properties.addTitle(Locale.getDefault(), "Unknown Title");
         }
     }
 
@@ -250,7 +254,7 @@ public class OpenLyricsObject {
     /**
      * Parse lyrics.
      */
-    private void parseLyrics() {
+    private void parseLyrics() throws OpenLyricsException {
         NodeList lyricsNodes = this.doc.getElementsByTagName("lyrics");
         if (lyricsNodes != null && lyricsNodes.getLength() > 0) {
             NodeList verseNodes = lyricsNodes.item(0).getChildNodes();
@@ -265,7 +269,7 @@ public class OpenLyricsObject {
      * Parse one verse.
      * @param verse
      */
-    private void parseVerse(Element verseElement) {
+    private void parseVerse(Element verseElement) throws OpenLyricsException {
         Locale locale = !verseElement.getAttribute("lang").equals("")
                         ? new Locale(verseElement.getAttribute("lang"))
                         : Locale.getDefault();
@@ -276,6 +280,9 @@ public class OpenLyricsObject {
         Verse verse = new Verse();
         verse.setName(verseElement.getAttribute("name")); // XXX: Or!??
         Element linesNode = (Element) verseElement.getElementsByTagName("lines").item(0);
+        if (linesNode == null) {
+            throw new OpenLyricsException("No lines in the verse.");
+        }
         NodeList textNodes = linesNode.getChildNodes();
 
         StringBuilder textLine = new StringBuilder();
