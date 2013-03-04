@@ -65,7 +65,7 @@ public class TempoProperty {
     public TempoProperty(String tempo, String type) throws TempoPropertyException {
         this.tempo = tempo;
         this.type = type;
-        if (!this.type.equals(TempoProperty.TYPE_BPM) || !this.type.equals(TempoProperty.TYPE_TEXT)) {
+        if (!this.type.equals(TempoProperty.TYPE_BPM) && !this.type.equals(TempoProperty.TYPE_TEXT)) {
             throw new TempoPropertyException("Unknown tempo type: " + type);
         }
     }
