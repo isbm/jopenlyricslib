@@ -152,10 +152,145 @@ public class OpenLyricsWriter {
      */
     private Element getProperties() {
         Element properties = this.doc.createElement("properties");
-
         properties.appendChild(this.getTitles());
+        properties.appendChild(this.getAuthors());
+        properties.appendChild(this.getCopyright());
+        properties.appendChild(this.getComments());
+        properties.appendChild(this.getVerseOrder());
+        properties.appendChild(this.getKey());
+        properties.appendChild(this.getPublisher());
+        properties.appendChild(this.getTempo());
 
         return properties;
+    }
+
+
+    /**
+     * Get tempo of the song.
+     *
+     * @return
+     */
+    private Element getTempo() {
+        Element tempoElement = this.doc.createElement("tempo");
+        if (this.ol.getProperties().getTempo() != null) {
+            tempoElement.setAttribute("type", this.ol.getProperties().getTempo().getType());
+            tempoElement.appendChild(this.doc.createTextNode(this.ol.getProperties().getTempo().getTempo()));
+        }
+
+        return tempoElement;
+    }
+
+
+    /**
+     * Get publisher of the song.
+     * 
+     * @return
+     */
+    private Element getPublisher() {
+        Element publisherElement = this.doc.createElement("publisher");
+        if (this.ol.getProperties().getPublisher() != null && !this.ol.getProperties().getPublisher().isEmpty()) {
+            publisherElement.appendChild(this.doc.createTextNode(this.ol.getProperties().getPublisher()));
+        }
+
+        return publisherElement;
+    }
+
+
+    /**
+     * Get key tonality.
+     *
+     * @return
+     */
+    private Element getKey() {
+        Element keyElement = this.doc.createElement("key");
+        if (this.ol.getProperties().getKey() != null && !this.ol.getProperties().getKey().isEmpty()) {
+            keyElement.appendChild(this.doc.createTextNode(this.ol.getProperties().getKey()));
+        }
+
+        return keyElement;
+    }
+
+
+    /**
+     * Get verse order.
+     *
+     * @return
+     */
+    private Element getVerseOrder() {
+        // XXX: Verse order needs to be redesigned entirely.
+
+        Element verseOrderElement = this.doc.createElement("verseOrder");
+        List<String> verseOrderList = this.ol.getProperties().getVerseOrder();
+        StringBuilder verseOrderText = new StringBuilder();
+        if (verseOrderList != null && !verseOrderList.isEmpty()) {
+            for (int i = 0; i < verseOrderList.size(); i++) {
+                verseOrderText.append(verseOrderList.get(i)).append(" ");
+            }
+        } else {
+            // Plain from XML
+            List<Verse> verses = this.ol.getVerses();
+            for (int i = 0; i < verses.size(); i++) {
+                verseOrderText.append(verses.get(i).getName()).append(" ");
+            }
+        }
+
+        verseOrderElement.appendChild(this.doc.createTextNode(verseOrderText.toString().trim()));
+
+        return verseOrderElement;
+    }
+
+
+    /**
+     * Get comments to the song.
+     *
+     * @return
+     */
+    private Element getComments() {
+        Element commentsBlockElement = this.doc.createElement("comments");
+        List<String> comments = this.ol.getProperties().getComments();
+        if (comments != null && !comments.isEmpty()) {
+            for (int i = 0; i < comments.size(); i++) {
+                Element commentElement = this.doc.createElement("comment");
+                commentElement.appendChild(this.doc.createTextNode(comments.get(i)));
+                commentsBlockElement.appendChild(commentElement);
+            }
+        }
+
+        return commentsBlockElement;
+    }
+
+
+    /**
+     * Get copyright.
+     * 
+     * @return
+     */
+    private Element getCopyright() {
+        Element copyrightElement = this.doc.createElement("copyright");
+        String copyrightNotice = this.ol.getProperties().getCopyright();
+        copyrightElement.appendChild(this.doc.createTextNode((copyrightNotice != null && !copyrightNotice.isEmpty())
+                                                             ? copyrightNotice : "Unknown"));
+        return copyrightElement;
+    }
+
+
+    /**
+     * Get authors of the song.
+     *
+     * @return
+     */
+    private Element getAuthors() {
+        Element authorsElement = this.doc.createElement("authors");
+
+        // Gather authors
+        List<Locale> titleLocales = this.ol.getProperties().getTitleProperty().getTitleLocales();
+        for (int i = 0; i < titleLocales.size(); i++) {
+            Element authorElement = this.doc.createElement("author");
+            authorElement.appendChild(this.doc.createTextNode(this.ol.getProperties().getTitleProperty().getTitle(titleLocales.get(i))));
+            authorsElement.appendChild(authorElement);
+        }
+
+        return authorsElement;
     }
 
 
@@ -166,7 +301,7 @@ public class OpenLyricsWriter {
      */
     private Element getTitles() {
         Element titlesElement = this.doc.createElement("titles");
-        
+
         // Gather titles
         List<Locale> titleLocales = this.ol.getProperties().getTitleProperty().getTitleLocales();
         for (int i = 0; i < titleLocales.size(); i++) {
