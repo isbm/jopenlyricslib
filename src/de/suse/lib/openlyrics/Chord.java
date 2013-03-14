@@ -216,7 +216,7 @@ public class Chord {
         }
 
         // Find if it is minor or major
-        this.isMinor = this.quality != null && chord.replace(this.quality, "").contains("m") || chord.contains("m");
+        this.isMinor = this.quality != null && chord.replace(this.quality, "").contains("m") || (this.quality == null && chord.contains("m"));
 
 
         //this.add;           // Added tone chord.
